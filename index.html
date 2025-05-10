@@ -1,36 +1,18 @@
 <!DOCTYPE html>
 <html lang="en-us">
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <title>Unity Web Player | My project</title>
-  <link rel="shortcut icon" href="TemplateData/favicon.ico">
-  <link rel="stylesheet" href="TemplateData/style.css">
+  <meta charset="utf-8" />
+  <title>Unity WebGL Login</title>
 
-  <!-- Google Identity Services 라이브러리 -->
+  <!-- UnityLoader 로더 -->
+  <script src="Build/UnityLoader.js"></script>
+
+  <!-- Google Identity Services -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <script>
-    let client; // Google 로그인 클라이언트
-    let unityInstance = null; // Unity 인스턴스 저장용
-
-    window.onload = function () {
-      client = google.accounts.id.initialize({
-        client_id: "920271608315-s4a4v4js2viqnf7lgofh826ljcvv8mqc.apps.googleusercontent.com",  // 여기에 OAuth2 클라이언트 ID 입력
-        callback: handleCredentialResponse
-      });
-    };
-
-    function handleCredentialResponse(response) {
-      const payload = parseJwt(response.credential);
-
-      if (unityInstance && typeof unityInstance.SendMessage === 'function') {
-        unityInstance.SendMessage('YourUnityGameObject', 'OnGoogleLoginSuccess', payload.name);
-      } else {
-        console.error("Unity 인스턴스가 아직 준비되지 않았거나 SendMessage를 찾을 수 없습니다.");
-      }
-
-    }
+    let unityInstance = null;
+    let client = null;
 
     function parseJwt(token) {
       const base64Url = token.split('.')[1];
@@ -38,105 +20,56 @@
       const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
         return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
       }).join(''));
-
       return JSON.parse(jsonPayload);
     }
 
-    // Unity에서 호출할 Google 로그인 함수
-    function triggerGoogleLogin() {
-      if (client) {
-        google.accounts.id.prompt();  // 팝업 창으로 로그인
+    function handleCredentialResponse(response) {
+      const payload = parseJwt(response.credential);
+      if (unityInstance && typeof unityInstance.SendMessage === "function") {
+        unityInstance.SendMessage("YourUnityGameObject", "OnGoogleLoginSuccess", payload.name);
       } else {
-        console.error("Google Client가 초기화되지 않았습니다.");
+        console.error("Unity가 아직 로딩되지 않았거나 SendMessage를 사용할 수 없습니다.");
       }
     }
+
+    // Unity에서 호출할 로그인 트리거
+    function triggerGoogleLogin() {
+      if (client) {
+        google.accounts.id.prompt();
+      } else {
+        console.error("Google 로그인 클라이언트가 초기화되지 않았습니다.");
+      }
+    }
+
+    window.onload = function () {
+      // ✅ Unity 인스턴스화 (UnityLoader 사용)
+      unityInstance = UnityLoader.instantiate("gameContainerId", "Build/4.json");
+
+      // ✅ Google 로그인 초기화
+      client = google.accounts.id.initialize({
+        client_id: "920271608315-s4a4v4js2viqnf7lgofh826ljcvv8mqc.apps.googleusercontent.com",
+        callback: handleCredentialResponse
+      });
+    };
   </script>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #000;
+    }
+    #gameContainerId {
+      width: 960px;
+      height: 600px;
+      margin: auto;
+      background: #000;
+    }
+  </style>
 </head>
 
 <body>
-  <div id="unity-container" class="unity-desktop">
-    <canvas id="unity-canvas" width=1920 height=1080 tabindex="-1"></canvas>
-    <div id="unity-loading-bar">
-      <div id="unity-logo"></div>
-      <div id="unity-progress-bar-empty">
-        <div id="unity-progress-bar-full"></div>
-      </div>
-    </div>
-    <div id="unity-warning"> </div>
-    <div id="unity-footer">
-      <div id="unity-logo-title-footer"></div>
-      <div id="unity-fullscreen-button"></div>
-      <div id="unity-build-title">My project</div>
-    </div>
-  </div>
-
-  <script>
-    var canvas = document.querySelector("#unity-canvas");
-
-    function unityShowBanner(msg, type) {
-      var warningBanner = document.querySelector("#unity-warning");
-      function updateBannerVisibility() {
-        warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
-      }
-      var div = document.createElement('div');
-      div.innerHTML = msg;
-      warningBanner.appendChild(div);
-      if (type == 'error') div.style = 'background: red; padding: 10px;';
-      else {
-        if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
-        setTimeout(function () {
-          warningBanner.removeChild(div);
-          updateBannerVisibility();
-        }, 5000);
-      }
-      updateBannerVisibility();
-    }
-
-    var buildUrl = "Build";
-    var loaderUrl = buildUrl + "/4.loader.js";
-    var config = {
-      arguments: [],
-      dataUrl: buildUrl + "/4.data",
-      frameworkUrl: buildUrl + "/4.framework.js",
-      codeUrl: buildUrl + "/4.wasm",
-      streamingAssetsUrl: "StreamingAssets",
-      companyName: "DefaultCompany",
-      productName: "My project",
-      productVersion: "1.0",
-      showBanner: unityShowBanner,
-    };
-
-    if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-      var meta = document.createElement('meta');
-      meta.name = 'viewport';
-      meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
-      document.getElementsByTagName('head')[0].appendChild(meta);
-      document.querySelector("#unity-container").className = "unity-mobile";
-      canvas.className = "unity-mobile";
-    } else {
-      canvas.style.width = "1920px";
-      canvas.style.height = "1080px";
-    }
-
-    document.querySelector("#unity-loading-bar").style.display = "block";
-
-    var script = document.createElement("script");
-    script.src = loaderUrl;
-    script.onload = () => {
-      createUnityInstance(canvas, config, (progress) => {
-        document.querySelector("#unity-progress-bar-full").style.width = 100 * progress + "%";
-      }).then((instance) => {
-        unityInstance = instance; // ✅ 인스턴스 저장
-        document.querySelector("#unity-loading-bar").style.display = "none";
-        document.querySelector("#unity-fullscreen-button").onclick = () => {
-          instance.SetFullscreen(1);
-        };
-      }).catch((message) => {
-        alert(message);
-      });
-    };
-
-    document.body.appendChild(script);
-  </script>
+  <!-- Unity WebGL 게임 위치 -->
+  <div id="gameContainerId"></div>
 </body>
 </html>
