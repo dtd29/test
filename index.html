@@ -1,11 +1,16 @@
 <!DOCTYPE html>
-<html lang="en-us">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Unity WebGL Login</title>
+  <title>%UNITY_WEBGL_NAME%</title>
+  <link rel="shortcut icon" href="%UNITY_WEBGL_BUILD_URL%/favicon.ico" />
+  <style>
+    body { margin: 0; padding: 0; background: #000; }
+    #gameContainerId { width: 960px; height: 600px; margin: auto; background: #000; }
+  </style>
 
-  <!-- UnityLoader 로더 -->
-  <script src="Build/UnityLoader.js"></script>
+  <!-- UnityLoader.js -->
+  <script src="%UNITY_WEBGL_LOADER_URL%"></script>
 
   <!-- Google Identity Services -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -28,11 +33,10 @@
       if (unityInstance && typeof unityInstance.SendMessage === "function") {
         unityInstance.SendMessage("YourUnityGameObject", "OnGoogleLoginSuccess", payload.name);
       } else {
-        console.error("Unity가 아직 로딩되지 않았거나 SendMessage를 사용할 수 없습니다.");
+        console.error("Unity 인스턴스가 아직 준비되지 않았거나 SendMessage를 사용할 수 없습니다.");
       }
     }
 
-    // Unity에서 호출할 로그인 트리거
     function triggerGoogleLogin() {
       if (client) {
         google.accounts.id.prompt();
@@ -42,34 +46,17 @@
     }
 
     window.onload = function () {
-      // ✅ Unity 인스턴스화 (UnityLoader 사용)
-      unityInstance = UnityLoader.instantiate("gameContainerId", "Build/4.json");
+      unityInstance = UnityLoader.instantiate("gameContainerId", "%UNITY_WEBGL_BUILD_URL%/Build.json");
 
-      // ✅ Google 로그인 초기화
       client = google.accounts.id.initialize({
         client_id: "920271608315-s4a4v4js2viqnf7lgofh826ljcvv8mqc.apps.googleusercontent.com",
         callback: handleCredentialResponse
       });
     };
   </script>
-
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background-color: #000;
-    }
-    #gameContainerId {
-      width: 960px;
-      height: 600px;
-      margin: auto;
-      background: #000;
-    }
-  </style>
 </head>
 
 <body>
-  <!-- Unity WebGL 게임 위치 -->
   <div id="gameContainerId"></div>
 </body>
 </html>
