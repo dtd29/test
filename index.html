@@ -1,69 +1,138 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <title>%UNITY_WEBGL_NAME%</title>
-  <link rel="shortcut icon" href="%UNITY_WEBGL_BUILD_URL%/favicon.ico" />
-  <style>
-    body { margin: 0; padding: 0; background: #000; }
-    #gameContainerId { width: 1920px; height: 1080px; margin: auto; background: #000; }
-  </style>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <title>Unity Web Player | My project</title>
+    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <link rel="stylesheet" href="TemplateData/style.css">
 
-  <!-- UnityLoader.js -->
-  <script src="Build/UnityLoader.js"></script>
+    <!-- ✅ Firebase SDK 추가 -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
 
-  <!-- Google Identity Services -->
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <!-- ✅ Firebase 초기화 -->
+    <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyBslX4_oHebPddJuxZ4I3d2AnPKcrBRpb8",
+        authDomain: "my-project-e7cf7.firebaseapp.com",
+        projectId: "my-project-e7cf7",
+        storageBucket: "my-project-e7cf7.firebasestorage.app",
+        messagingSenderId: "1020976587463",
+        appId: "1:1020976587463:web:ebef0dc59c5848b7a794e2"
+      };
+      firebase.initializeApp(firebaseConfig);
 
-  <script>
-    let unityInstance = null;
-    let client = null;
+      // ✅ Unity → JS 호출: 로그인 요청
+      function loginWithGoogle() {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        firebase.auth().signInWithPopup(provider)
+          .then((result) => {
+            const user = result.user;
+            const userInfo = {
+              name: user.displayName,
+              email: user.email,
+              uid: user.uid
+            };
+            if (unityInstance && unityInstance.SendMessage) {
+              unityInstance.SendMessage("YourUnityGameObject", "OnFirebaseLoginSuccess", JSON.stringify(userInfo));
+            } else {
+              console.error("Unity 인스턴스가 아직 준비되지 않음");
+            }
+          })
+          .catch((error) => {
+            console.error("로그인 실패:", error);
+          });
+      }
+    </script>
+  </head>
 
-    function parseJwt(token) {
-      const base64Url = token.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-      }).join(''));
-      return JSON.parse(jsonPayload);
-    }
+  <body>
+    <div id="unity-container" class="unity-desktop">
+      <canvas id="unity-canvas" width=1920 height=1080 tabindex="-1"></canvas>
+      <div id="unity-loading-bar">
+        <div id="unity-logo"></div>
+        <div id="unity-progress-bar-empty">
+          <div id="unity-progress-bar-full"></div>
+        </div>
+      </div>
+      <div id="unity-warning"></div>
+      <div id="unity-footer">
+        <div id="unity-logo-title-footer"></div>
+        <div id="unity-fullscreen-button"></div>
+        <div id="unity-build-title">My project</div>
+      </div>
+    </div>
 
-    function handleCredentialResponse(response) {
-      const payload = parseJwt(response.credential);
+    <script>
+      var canvas = document.querySelector("#unity-canvas");
 
-      const userInfo = {
-        name: payload.name,
-        email: payload.email,
+      function unityShowBanner(msg, type) {
+        var warningBanner = document.querySelector("#unity-warning");
+        function updateBannerVisibility() {
+          warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+        }
+        var div = document.createElement('div');
+        div.innerHTML = msg;
+        warningBanner.appendChild(div);
+        if (type == 'error') div.style = 'background: red; padding: 10px;';
+        else {
+          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
+          setTimeout(() => {
+            warningBanner.removeChild(div);
+            updateBannerVisibility();
+          }, 5000);
+        }
+        updateBannerVisibility();
+      }
+
+      var buildUrl = "Build";
+      var loaderUrl = buildUrl + "/f1.loader.js";
+      var config = {
+        arguments: [],
+        dataUrl: buildUrl + "/f1.data",
+        frameworkUrl: buildUrl + "/f1.framework.js",
+        codeUrl: buildUrl + "/f1.wasm",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "DefaultCompany",
+        productName: "My project",
+        productVersion: "1.0",
+        showBanner: unityShowBanner,
       };
 
-      if (unityInstance && typeof unityInstance.SendMessage === "function") {
-        unityInstance.SendMessage("YourUnityGameObject", "OnGoogleLoginSuccess", JSON.stringify(userInfo));
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        var meta = document.createElement('meta');
+        meta.name = 'viewport';
+        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+        document.getElementsByTagName('head')[0].appendChild(meta);
+        document.querySelector("#unity-container").className = "unity-mobile";
+        canvas.className = "unity-mobile";
       } else {
-        console.error("Unity 인스턴스가 아직 준비되지 않았습니다.");
+        canvas.style.width = "1920px";
+        canvas.style.height = "1080px";
       }
-    }
 
+      document.querySelector("#unity-loading-bar").style.display = "block";
 
-    function triggerGoogleLogin() {
-      if (client) {
-        google.accounts.id.prompt();
-      } else {
-        console.error("Google 로그인 클라이언트가 초기화되지 않았습니다.");
-      }
-    }
+      // ✅ Unity 인스턴스를 글로벌 변수에 저장
+      var unityInstance = null;
 
-    window.onload = function () {
-      unityInstance = UnityLoader.instantiate("gameContainerId", "%UNITY_WEBGL_BUILD_URL%/%UNITY_WEBGL_LOADER_FILENAME%");
+      var script = document.createElement("script");
+      script.src = loaderUrl;
+      script.onload = () => {
+        createUnityInstance(canvas, config, (progress) => {
+          document.querySelector("#unity-progress-bar-full").style.width = 100 * progress + "%";
+        }).then((instance) => {
+          unityInstance = instance;
+          document.querySelector("#unity-loading-bar").style.display = "none";
+          document.querySelector("#unity-fullscreen-button").onclick = () => {
+            instance.SetFullscreen(1);
+          };
+        }).catch((message) => {
+          alert(message);
+        });
+      };
 
-      client = google.accounts.id.initialize({
-        client_id: "920271608315-s4a4v4js2viqnf7lgofh826ljcvv8mqc.apps.googleusercontent.com",
-        callback: handleCredentialResponse
-      });
-    };
-  </script>
-</head>
-
-<body>
-  <div id="gameContainerId"></div>
-</body>
+      document.body.appendChild(script);
+    </script>
+  </body>
 </html>
