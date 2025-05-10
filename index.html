@@ -30,13 +30,15 @@
 
     function handleCredentialResponse(response) {
       const payload = parseJwt(response.credential);
-
       const userInfo = {
         name: payload.name,
         email: payload.email,
       };
-
-      unityInstance.SendMessage("YourUnityGameObject", "OnGoogleLoginSuccess", JSON.stringify(userInfo));
+      if (unityInstance && typeof unityInstance.SendMessage === "function") {
+        unityInstance.SendMessage("YourUnityGameObject", "OnGoogleLoginSuccess", JSON.stringify(userInfo));
+      } else {
+        console.error("Unity 인스턴스가 아직 준비되지 않았거나 SendMessage를 사용할 수 없습니다.");
+      }
     }
 
 
