@@ -28,35 +28,39 @@
   </script>
 
   <script>
-    function loginWithGoogle() {
+    // ✅ Unity → jslib → 여기 도달함
+    function StartGoogleLoginJS() {
+      if (typeof google === 'undefined' || typeof firebase === 'undefined') {
+        console.error("필수 라이브러리가 로드되지 않았습니다.");
+        return;
+      }
+
       google.accounts.id.initialize({
         client_id: "920271608315-s4a4v4js2viqnf7lgofh826ljcvv8mqc.apps.googleusercontent.com",
-        callback: handleCredentialResponse
+        callback: (response) => {
+          const credential = response.credential;
+          const provider = firebase.auth.GoogleAuthProvider.credential(credential);
+
+          firebase.auth().signInWithCredential(provider)
+            .then((result) => {
+              console.log("로그인 성공:", result.user.email);
+              if (typeof unityInstance !== 'undefined') {
+                unityInstance.SendMessage("FirebaseManager", "OnGoogleLogin", result.user.email);
+              }
+            })
+            .catch((error) => {
+              console.error("로그인 실패:", error.message);
+              if (typeof unityInstance !== 'undefined') {
+                unityInstance.SendMessage("FirebaseManager", "OnLoginFailed", error.message);
+              }
+            });
+        }
       });
 
-      google.accounts.id.prompt(); // 팝업으로 로그인 창 표시
-    }
-
-    function handleCredentialResponse(response) {
-      const credential = response.credential;
-      const auth = firebase.auth();
-
-      const provider = firebase.auth.GoogleAuthProvider.credential(credential);
-      auth.signInWithCredential(provider)
-        .then((result) => {
-          console.log("로그인 성공: ", result.user.email);
-          if (window.unityInstance) {
-            window.unityInstance.SendMessage("FirebaseManager", "OnGoogleLogin", result.user.email);
-          }
-        })
-        .catch((error) => {
-          console.error("로그인 실패:", error.message);
-          if (window.unityInstance) {
-            window.unityInstance.SendMessage("FirebaseManager", "OnLoginFailed", error.message);
-          }
-        });
+      google.accounts.id.prompt(); // 로그인 팝업 표시
     }
   </script>
+
 </head>
 <body>
   <div id="unity-container" class="unity-desktop">
