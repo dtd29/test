@@ -1,147 +1,147 @@
 <!DOCTYPE html>
 <html lang="en-us">
-  <head>
-    <meta charset="utf-8">
-    <title>Unity Web Player | My project</title>
-    <link rel="shortcut icon" href="TemplateData/favicon.ico">
-    <link rel="stylesheet" href="TemplateData/style.css">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Unity Web Player | My project</title>
+  <link rel="shortcut icon" href="TemplateData/favicon.ico">
+  <link rel="stylesheet" href="TemplateData/style.css">
 
-    <!-- ✅ Firebase SDK (compat 버전 사용!) -->
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
 
-    <!-- ✅ Firebase 초기화 -->
-    <script>
-      const firebaseConfig = {
-        apiKey: "AIzaSyBslX4_oHebPddJuxZ4I3d2AnPKcrBRpb8",
-        authDomain: "my-project-e7cf7.firebaseapp.com",
-        databaseURL: "https://my-project-e7cf7-default-rtdb.firebaseio.com",
-        projectId: "my-project-e7cf7",
-        storageBucket: "my-project-e7cf7.firebasestorage.app",
-        messagingSenderId: "1020976587463",
-        appId: "1:1020976587463:web:ebef0dc59c5848b7a794e2"
-      };
-      firebase.initializeApp(firebaseConfig);
+  <!-- Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 
-      // ✅ Google 로그인 + DB 저장
-      function loginWithGoogle() {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        firebase.auth().signInWithPopup(provider)
-          .then((result) => {
-            const user = result.user;
-            const userInfo = {
-              name: user.displayName,
-              email: user.email,
-              uid: user.uid
-            };
+  <!-- Firebase 설정 -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCn7nhP5gDioksMqVbDtxCC3ZdJWLjxoIM",
+      authDomain: "test2-d9371.firebaseapp.com",
+      projectId: "test2-d9371",
+      storageBucket: "test2-d9371.firebasestorage.app",
+      messagingSenderId: "826297010457",
+      appId: "1:826297010457:web:a65725b0ed69c64b94dd88"
+    };
+    firebase.initializeApp(firebaseConfig);
+  </script>
 
-            // Realtime Database에 사용자 정보 저장
-            firebase.database().ref('users/' + user.uid).set({
-              name: user.displayName,
-              email: user.email,
-              loginTime: new Date().toISOString()
-            }).then(() => {
-              if (unityInstance && unityInstance.SendMessage) {
-                unityInstance.SendMessage("YourUnityGameObject", "OnFirebaseLoginSuccess", JSON.stringify(userInfo));
-              }
-            }).catch((err) => {
-              console.error("DB 저장 실패:", err);
-            });
+  <script>
+    function StartGoogleLogin() {
+      google.accounts.id.initialize({
+        client_id: "920271608315-s4a4v4js2viqnf7lgofh826ljcvv8mqc.apps.googleusercontent.com",
+        callback: handleCredentialResponse
+      });
 
-          }).catch((err) => {
-            console.error("로그인 실패:", err);
-          });
-      }
-    </script>
-  </head>
+      google.accounts.id.prompt(); // 팝업으로 로그인 창 표시
+    }
 
-  <body>
-    <div id="unity-container" class="unity-desktop">
-      <canvas id="unity-canvas" width=1920 height=1080 tabindex="-1"></canvas>
-      <div id="unity-loading-bar">
-        <div id="unity-logo"></div>
-        <div id="unity-progress-bar-empty">
-          <div id="unity-progress-bar-full"></div>
-        </div>
-      </div>
-      <div id="unity-warning"></div>
-      <div id="unity-footer">
-        <div id="unity-logo-title-footer"></div>
-        <div id="unity-fullscreen-button"></div>
-        <div id="unity-build-title">My project</div>
+    function handleCredentialResponse(response) {
+      const credential = response.credential;
+      const auth = firebase.auth();
+
+      const provider = firebase.auth.GoogleAuthProvider.credential(credential);
+      auth.signInWithCredential(provider)
+        .then((result) => {
+          console.log("로그인 성공: ", result.user.email);
+          if (window.unityInstance) {
+            window.unityInstance.SendMessage("FirebaseManager", "OnGoogleLogin", result.user.email);
+          }
+        })
+        .catch((error) => {
+          console.error("로그인 실패:", error.message);
+          if (window.unityInstance) {
+            window.unityInstance.SendMessage("FirebaseManager", "OnLoginFailed", error.message);
+          }
+        });
+    }
+  </script>
+</head>
+<body>
+  <div id="unity-container" class="unity-desktop">
+    <canvas id="unity-canvas" width=1920 height=1080 tabindex="-1"></canvas>
+    <div id="unity-loading-bar">
+      <div id="unity-logo"></div>
+      <div id="unity-progress-bar-empty">
+        <div id="unity-progress-bar-full"></div>
       </div>
     </div>
+    <div id="unity-warning"></div>
+    <div id="unity-footer">
+      <div id="unity-logo-title-footer"></div>
+      <div id="unity-fullscreen-button"></div>
+      <div id="unity-build-title">My project</div>
+    </div>
+  </div>
 
-    <script>
-      const canvas = document.querySelector("#unity-canvas");
+  <script>
+    var canvas = document.querySelector("#unity-canvas");
 
-      function unityShowBanner(msg, type) {
-        const warningBanner = document.querySelector("#unity-warning");
-        function updateBannerVisibility() {
-          warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
-        }
-        const div = document.createElement('div');
-        div.innerHTML = msg;
-        warningBanner.appendChild(div);
-        if (type === 'error') div.style = 'background: red; padding: 10px;';
-        else {
-          if (type === 'warning') div.style = 'background: yellow; padding: 10px;';
-          setTimeout(() => {
-            warningBanner.removeChild(div);
-            updateBannerVisibility();
-          }, 5000);
-        }
-        updateBannerVisibility();
+    function unityShowBanner(msg, type) {
+      var warningBanner = document.querySelector("#unity-warning");
+      function updateBannerVisibility() {
+        warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
       }
-
-      const buildUrl = "Build";
-      const loaderUrl = buildUrl + "/f1.loader.js";
-      const config = {
-        arguments: [],
-        dataUrl: buildUrl + "/f1.data",
-        frameworkUrl: buildUrl + "/f1.framework.js",
-        codeUrl: buildUrl + "/f1.wasm",
-        streamingAssetsUrl: "StreamingAssets",
-        companyName: "DefaultCompany",
-        productName: "My project",
-        productVersion: "1.0",
-        showBanner: unityShowBanner,
-      };
-
-      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-        const meta = document.createElement('meta');
-        meta.name = 'viewport';
-        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
-        document.getElementsByTagName('head')[0].appendChild(meta);
-        document.querySelector("#unity-container").className = "unity-mobile";
-        canvas.className = "unity-mobile";
-      } else {
-        canvas.style.width = "1920px";
-        canvas.style.height = "1080px";
+      var div = document.createElement('div');
+      div.innerHTML = msg;
+      warningBanner.appendChild(div);
+      if (type == 'error') div.style = 'background: red; padding: 10px;';
+      else {
+        if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
+        setTimeout(function () {
+          warningBanner.removeChild(div);
+          updateBannerVisibility();
+        }, 5000);
       }
+      updateBannerVisibility();
+    }
 
-      document.querySelector("#unity-loading-bar").style.display = "block";
+    var buildUrl = "Build";
+    var loaderUrl = buildUrl + "/f1.loader.js";
+    var config = {
+      arguments: [],
+      dataUrl: buildUrl + "/f1.data",
+      frameworkUrl: buildUrl + "/f1.framework.js",
+      codeUrl: buildUrl + "/f1.wasm",
+      streamingAssetsUrl: "StreamingAssets",
+      companyName: "DefaultCompany",
+      productName: "My project",
+      productVersion: "1.0",
+      showBanner: unityShowBanner,
+    };
 
-      let unityInstance = null;
+    if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+      var meta = document.createElement('meta');
+      meta.name = 'viewport';
+      meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+      document.getElementsByTagName('head')[0].appendChild(meta);
+      document.querySelector("#unity-container").className = "unity-mobile";
+      canvas.className = "unity-mobile";
+    } else {
+      canvas.style.width = "1920px";
+      canvas.style.height = "1080px";
+    }
 
-      const script = document.createElement("script");
-      script.src = loaderUrl;
-      script.onload = () => {
-        createUnityInstance(canvas, config, (progress) => {
-          document.querySelector("#unity-progress-bar-full").style.width = 100 * progress + "%";
-        }).then((instance) => {
-          unityInstance = instance;
-          document.querySelector("#unity-loading-bar").style.display = "none";
-          document.querySelector("#unity-fullscreen-button").onclick = () => {
-            instance.SetFullscreen(1);
-          };
-        }).catch((message) => {
-          alert(message);
-        });
-      };
+    document.querySelector("#unity-loading-bar").style.display = "block";
 
-      document.body.appendChild(script);
-    </script>
-  </body>
+    var script = document.createElement("script");
+    script.src = loaderUrl;
+    script.onload = () => {
+      createUnityInstance(canvas, config, (progress) => {
+        document.querySelector("#unity-progress-bar-full").style.width = 100 * progress + "%";
+      }).then((unityInstance) => {
+        document.querySelector("#unity-loading-bar").style.display = "none";
+        document.querySelector("#unity-fullscreen-button").onclick = () => {
+          unityInstance.SetFullscreen(1);
+        };
+        window.unityInstance = unityInstance;
+      }).catch((message) => {
+        alert(message);
+      });
+    };
+
+    document.body.appendChild(script);
+  </script>
+</body>
 </html>
