@@ -7,23 +7,24 @@
   <link rel="shortcut icon" href="TemplateData/favicon.ico">
   <link rel="stylesheet" href="TemplateData/style.css">
 
-  <!-- Firebase SDK -->
+  <!-- ✅ Firebase SDK: 브라우저용 compat 버전 사용 (절대 이거만 써야 함) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 
-
-  <!-- Firebase 설정 -->
+  <!-- ✅ Firebase 초기화 -->
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyCn7nhP5gDioksMqVbDtxCC3ZdJWLjxoIM",
       authDomain: "test2-d9371.firebaseapp.com",
       projectId: "test2-d9371",
-      storageBucket: "test2-d9371.firebasestorage.app",
+      storageBucket: "test2-d9371.appspot.com", // 여기도 오타 고침
       messagingSenderId: "826297010457",
       appId: "1:826297010457:web:a65725b0ed69c64b94dd88"
     };
+
     firebase.initializeApp(firebaseConfig);
   </script>
+
 
   <!-- Google Identity Services -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
