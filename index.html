@@ -11,9 +11,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
 
-  <!-- Google Identity Services -->
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-
   <!-- Firebase 설정 -->
   <script>
     const firebaseConfig = {
@@ -27,12 +24,20 @@
     firebase.initializeApp(firebaseConfig);
   </script>
 
+  <!-- Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
   <script>
     // ✅ Unity → jslib → 여기 도달함
     function StartGoogleLoginJS() {
       if (typeof google === 'undefined' || typeof firebase === 'undefined') {
         console.error("필수 라이브러리가 로드되지 않았습니다.");
         return;
+      }
+
+      if (typeof firebase.auth !== "function") {
+      console.error("❌ Firebase Auth 모듈이 준비되지 않았습니다.");
+      return;
       }
 
       google.accounts.id.initialize({
