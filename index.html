@@ -6,7 +6,7 @@
   <link rel="shortcut icon" href="%UNITY_WEBGL_BUILD_URL%/favicon.ico" />
   <style>
     body { margin: 0; padding: 0; background: #000; }
-    #gameContainerId { width: 960px; height: 600px; margin: auto; background: #000; }
+    #gameContainerId { width: 1920px; height: 1080px; margin: auto; background: #000; }
   </style>
 
   <!-- UnityLoader.js -->
@@ -30,12 +30,19 @@
 
     function handleCredentialResponse(response) {
       const payload = parseJwt(response.credential);
+
+      const userInfo = {
+        name: payload.name,
+        email: payload.email,
+      };
+
       if (unityInstance && typeof unityInstance.SendMessage === "function") {
-        unityInstance.SendMessage("YourUnityGameObject", "OnGoogleLoginSuccess", payload.name);
+        unityInstance.SendMessage("YourUnityGameObject", "OnGoogleLoginSuccess", JSON.stringify(userInfo));
       } else {
-        console.error("Unity 인스턴스가 아직 준비되지 않았거나 SendMessage를 사용할 수 없습니다.");
+        console.error("Unity 인스턴스가 아직 준비되지 않았습니다.");
       }
     }
+
 
     function triggerGoogleLogin() {
       if (client) {
@@ -46,7 +53,7 @@
     }
 
     window.onload = function () {
-      unityInstance = UnityLoader.instantiate("gameContainerId", "%UNITY_WEBGL_BUILD_URL%/Build.json");
+      unityInstance = UnityLoader.instantiate("gameContainerId", "%UNITY_WEBGL_BUILD_URL%/%UNITY_WEBGL_LOADER_FILENAME%");
 
       client = google.accounts.id.initialize({
         client_id: "920271608315-s4a4v4js2viqnf7lgofh826ljcvv8mqc.apps.googleusercontent.com",
