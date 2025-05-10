@@ -6,15 +6,17 @@
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
 
-    <!-- ✅ Firebase SDK 추가 -->
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
+    <!-- ✅ Firebase SDK (compat 버전 사용!) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
     <!-- ✅ Firebase 초기화 -->
     <script>
       const firebaseConfig = {
         apiKey: "AIzaSyBslX4_oHebPddJuxZ4I3d2AnPKcrBRpb8",
         authDomain: "my-project-e7cf7.firebaseapp.com",
+        databaseURL: "https://my-project-e7cf7-default-rtdb.firebaseio.com",
         projectId: "my-project-e7cf7",
         storageBucket: "my-project-e7cf7.firebasestorage.app",
         messagingSenderId: "1020976587463",
@@ -22,7 +24,7 @@
       };
       firebase.initializeApp(firebaseConfig);
 
-      // ✅ Unity → JS 호출: 로그인 요청
+      // ✅ Google 로그인 + DB 저장
       function loginWithGoogle() {
         const provider = new firebase.auth.GoogleAuthProvider();
         firebase.auth().signInWithPopup(provider)
@@ -33,14 +35,22 @@
               email: user.email,
               uid: user.uid
             };
-            if (unityInstance && unityInstance.SendMessage) {
-              unityInstance.SendMessage("YourUnityGameObject", "OnFirebaseLoginSuccess", JSON.stringify(userInfo));
-            } else {
-              console.error("Unity 인스턴스가 아직 준비되지 않음");
-            }
-          })
-          .catch((error) => {
-            console.error("로그인 실패:", error);
+
+            // Realtime Database에 사용자 정보 저장
+            firebase.database().ref('users/' + user.uid).set({
+              name: user.displayName,
+              email: user.email,
+              loginTime: new Date().toISOString()
+            }).then(() => {
+              if (unityInstance && unityInstance.SendMessage) {
+                unityInstance.SendMessage("YourUnityGameObject", "OnFirebaseLoginSuccess", JSON.stringify(userInfo));
+              }
+            }).catch((err) => {
+              console.error("DB 저장 실패:", err);
+            });
+
+          }).catch((err) => {
+            console.error("로그인 실패:", err);
           });
       }
     </script>
@@ -64,19 +74,19 @@
     </div>
 
     <script>
-      var canvas = document.querySelector("#unity-canvas");
+      const canvas = document.querySelector("#unity-canvas");
 
       function unityShowBanner(msg, type) {
-        var warningBanner = document.querySelector("#unity-warning");
+        const warningBanner = document.querySelector("#unity-warning");
         function updateBannerVisibility() {
           warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
         }
-        var div = document.createElement('div');
+        const div = document.createElement('div');
         div.innerHTML = msg;
         warningBanner.appendChild(div);
-        if (type == 'error') div.style = 'background: red; padding: 10px;';
+        if (type === 'error') div.style = 'background: red; padding: 10px;';
         else {
-          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
+          if (type === 'warning') div.style = 'background: yellow; padding: 10px;';
           setTimeout(() => {
             warningBanner.removeChild(div);
             updateBannerVisibility();
@@ -85,9 +95,9 @@
         updateBannerVisibility();
       }
 
-      var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/f1.loader.js";
-      var config = {
+      const buildUrl = "Build";
+      const loaderUrl = buildUrl + "/f1.loader.js";
+      const config = {
         arguments: [],
         dataUrl: buildUrl + "/f1.data",
         frameworkUrl: buildUrl + "/f1.framework.js",
@@ -100,7 +110,7 @@
       };
 
       if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-        var meta = document.createElement('meta');
+        const meta = document.createElement('meta');
         meta.name = 'viewport';
         meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
         document.getElementsByTagName('head')[0].appendChild(meta);
@@ -113,10 +123,9 @@
 
       document.querySelector("#unity-loading-bar").style.display = "block";
 
-      // ✅ Unity 인스턴스를 글로벌 변수에 저장
-      var unityInstance = null;
+      let unityInstance = null;
 
-      var script = document.createElement("script");
+      const script = document.createElement("script");
       script.src = loaderUrl;
       script.onload = () => {
         createUnityInstance(canvas, config, (progress) => {
