@@ -6,7 +6,11 @@
   <link rel="shortcut icon" href="%UNITY_WEBGL_BUILD_URL%/favicon.ico" />
   <style>
     body { margin: 0; padding: 0; background: #000; }
+<<<<<<< HEAD
     #gameContainerId { width: 1920px; height: 1080px; margin: auto; background: #000; }
+=======
+    #gameContainerId { width: 960px; height: 600px; margin: auto; background: #000; }
+>>>>>>> parent of 069dc96 (z)
   </style>
 
   <!-- UnityLoader.js -->
@@ -30,17 +34,21 @@
 
     function handleCredentialResponse(response) {
       const payload = parseJwt(response.credential);
+<<<<<<< HEAD
       const userInfo = {
         name: payload.name,
         email: payload.email,
       };
       if (unityInstance && typeof unityInstance.SendMessage === "function") {
         unityInstance.SendMessage("YourUnityGameObject", "OnGoogleLoginSuccess", JSON.stringify(userInfo));
+=======
+      if (unityInstance && typeof unityInstance.SendMessage === "function") {
+        unityInstance.SendMessage("YourUnityGameObject", "OnGoogleLoginSuccess", payload.name);
+>>>>>>> parent of 069dc96 (z)
       } else {
         console.error("Unity 인스턴스가 아직 준비되지 않았거나 SendMessage를 사용할 수 없습니다.");
       }
     }
-
 
     function triggerGoogleLogin() {
       if (client) {
