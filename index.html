@@ -30,13 +30,16 @@
             const provider = firebase.auth.GoogleAuthProvider.credential(credential);
             firebase.auth().signInWithCredential(provider)
               .then((result) => {
+                const user = result.user;
+                const email = user?.email;
+
+                if (!email || !email.endsWith("@dimigo.hs.kr")) {
+                  alert("디미고 계정이 아님");
+                  return;
+                }
 
                 if (typeof unityInstance !== 'undefined') {
-                  if (!result.user.email.endsWith("dimigo.hs.kr")) {
-                    alert("디미고 계정이 아님");
-                    return;
-                  }
-                  unityInstance.SendMessage("FirebaseManager", "OnGoogleLogin", result.user.email);
+                  unityInstance.SendMessage("FirebaseManager", "OnGoogleLogin", email);
                 }
               })
               .catch((error) => {
