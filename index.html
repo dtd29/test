@@ -34,7 +34,6 @@
 
               const email = user?.email;
               const name = user?.displayName; 
-              const uid = user?.uid;
 
               if (!email) {
                 alert("로그인 실패: 이메일 정보 없음");
@@ -47,7 +46,7 @@
               }
 
               if (typeof unityInstance !== 'undefined') {
-                unityInstance.SendMessage("FirebaseManager", "OnGoogleLogin", JSON.stringify({ email, name, uid }));
+                unityInstance.SendMessage("FirebaseManager", "OnGoogleLogin", JSON.stringify({ email, name}));
               }
             })
             .catch((error) => {
@@ -92,13 +91,13 @@
     <canvas id="unity-canvas" data-pixel-art=""></canvas>
   </div>
 
-  <script src="Build/f10.loader.js"></script>
+  <script src="Build/f11.loader.js"></script>
   <script>
     const canvas = document.querySelector("#unity-canvas");
     const config = {
-      dataUrl: "Build/f10.data",
-      frameworkUrl: "Build/f10.framework.js",
-      codeUrl: "Build/f10.wasm",
+      dataUrl: "Build/f11.data",
+      frameworkUrl: "Build/f11.framework.js",
+      codeUrl: "Build/f11.wasm",
       streamingAssetsUrl: "StreamingAssets",
       companyName: "DefaultCompany",
       productName: "My project",
