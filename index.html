@@ -30,7 +30,6 @@
           const provider = firebase.auth.GoogleAuthProvider.credential(credential);
           firebase.auth().signInWithCredential(provider)
             .then((result) => {
-              console.log(email.endsWith("dimigo.hs.kr"));
               if (!email.endsWith("dimigo.hs.kr")) {
                 alert("디미고 계정이 아님");
                 return;
