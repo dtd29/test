@@ -10,57 +10,40 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCn7nhP5gDioksMqVbDtxCC3ZdJWLjxoIM",
+      authDomain: "test2-d9371.firebaseapp.com",
+      projectId: "test2-d9371",
+      storageBucket: "test2-d9371.appspot.com",
+      messagingSenderId: "826297010457",
+      appId: "1:826297010457:web:a65725b0ed69c64b94dd88"
+    };
+    firebase.initializeApp(firebaseConfig);
+
     function StartGoogleLoginJS() {
-      if (typeof google === 'undefined' || typeof firebase === 'undefined') {
-        alert("구글 또는 파이어베이스 SDK가 로드되지 않았습니다.");
-        return;
-      }
+      if (typeof google === 'undefined' || typeof firebase === 'undefined') return;
 
       google.accounts.id.initialize({
         client_id: "920271608315-s4a4v4js2viqnf7lgofh826ljcvv8mqc.apps.googleusercontent.com",
         callback: (response) => {
           const credential = response.credential;
           const provider = firebase.auth.GoogleAuthProvider.credential(credential);
-
           firebase.auth().signInWithCredential(provider)
             .then((result) => {
-              const user = result.user;
-              const email = user?.email;
-
-              if (!email) {
-                alert("로그인 실패: 이메일 정보를 가져오지 못했습니다.");
-                return;
-              }
-              console.log(email);
-              console.log(email.endsWith("@dimigo.hs.kr"));
-              // ❗ 정확하게 도메인 검사
-              if (!email.toLowerCase().endsWith("@dimigo.hs.kr")) {
-                alert("로그인 실패: 디미고 계정이 아닙니다.");
-                if (typeof unityInstance !== 'undefined') {
-                  unityInstance.SendMessage("FirebaseManager", "OnLoginFailed", "Not a Dimigo account");
-                }
-                return;
-              }
-
-              // ✅ 디미고 계정이면 성공 처리
               if (typeof unityInstance !== 'undefined') {
-                unityInstance.SendMessage("FirebaseManager", "OnGoogleLogin", email);
+                unityInstance.SendMessage("FirebaseManager", "OnGoogleLogin", result.user.email);
               }
             })
             .catch((error) => {
-              console.error("로그인 실패:", error.message);
-              alert("로그인 실패: " + error.message);
               if (typeof unityInstance !== 'undefined') {
                 unityInstance.SendMessage("FirebaseManager", "OnLoginFailed", error.message);
               }
             });
         }
       });
-
       google.accounts.id.prompt();
     }
   </script>
-
 
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no">
   <style>
