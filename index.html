@@ -1,154 +1,205 @@
 <!DOCTYPE html>
 <html lang="en-us">
+
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <title>Unity Web Player | My project</title>
-  <link rel="shortcut icon" href="TemplateData/favicon.ico">
-  <link rel="stylesheet" href="TemplateData/style.css">
+	<meta charset="utf-8">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>My project</title>
 
-  <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-auth-compat.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-app-compat.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-auth-compat.js"></script>
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyCn7nhP5gDioksMqVbDtxCC3ZdJWLjxoIM",
-      authDomain: "test2-d9371.firebaseapp.com",
-      projectId: "test2-d9371",
-      storageBucket: "test2-d9371.appspot.com",
-      messagingSenderId: "826297010457",
-      appId: "1:826297010457:web:a65725b0ed69c64b94dd88"
-    };
+	<script>
+		const firebaseConfig = {
+		apiKey: "AIzaSyCn7nhP5gDioksMqVbDtxCC3ZdJWLjxoIM",
+		authDomain: "test2-d9371.firebaseapp.com",
+		projectId: "test2-d9371",
+		storageBucket: "test2-d9371.appspot.com",
+		messagingSenderId: "826297010457",
+		appId: "1:826297010457:web:a65725b0ed69c64b94dd88"
+		};
 
-    firebase.initializeApp(firebaseConfig);
-  </script>
+		firebase.initializeApp(firebaseConfig);
+	</script>
 
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
+	<script src="https://accounts.google.com/gsi/client" async defer></script>
 
-  <script>
-    function StartGoogleLoginJS() {
-      if (typeof google === 'undefined' || typeof firebase === 'undefined') {
-        console.error("필수 라이브러리가 로드되지 않았습니다.");
-        return;
-      }
+	<script>
+		function StartGoogleLoginJS() {
+		if (typeof google === 'undefined' || typeof firebase === 'undefined') {
+			console.error("필수 라이브러리가 로드되지 않았습니다.");
+			return;
+		}
 
-      if (typeof firebase.auth !== "function") {
-      console.error("❌ Firebase Auth 모듈이 준비되지 않았습니다.");
-      return;
-      }
+		if (typeof firebase.auth !== "function") {
+			console.error("❌ Firebase Auth 모듈이 준비되지 않았습니다.");
+			return;
+		}
 
-      google.accounts.id.initialize({
-        client_id: "920271608315-s4a4v4js2viqnf7lgofh826ljcvv8mqc.apps.googleusercontent.com",
-        callback: (response) => {
-          const credential = response.credential;
-          const provider = firebase.auth.GoogleAuthProvider.credential(credential);
+		google.accounts.id.initialize({
+			client_id: "920271608315-s4a4v4js2viqnf7lgofh826ljcvv8mqc.apps.googleusercontent.com",
+			callback: (response) => {
+			const credential = response.credential;
+			const provider = firebase.auth.GoogleAuthProvider.credential(credential);
 
-          firebase.auth().signInWithCredential(provider)
-            .then((result) => {
-              console.log("로그인 성공:", result.user.email);
-              if (typeof unityInstance !== 'undefined') {
-                unityInstance.SendMessage("FirebaseManager", "OnGoogleLogin", result.user.email);
-              }
-            })
-            .catch((error) => {
-              console.error("로그인 실패:", error.message);
-              if (typeof unityInstance !== 'undefined') {
-                unityInstance.SendMessage("FirebaseManager", "OnLoginFailed", error.message);
-              }
-            });
-        }
-      });
+			firebase.auth().signInWithCredential(provider)
+				.then((result) => {
+				console.log("로그인 성공:", result.user.email);
+				if (typeof unityInstance !== 'undefined') {
+					unityInstance.SendMessage("FirebaseManager", "OnGoogleLogin", result.user.email);
+				}
+				})
+				.catch((error) => {
+				console.error("로그인 실패:", error.message);
+				if (typeof unityInstance !== 'undefined') {
+					unityInstance.SendMessage("FirebaseManager", "OnLoginFailed", error.message);
+				}
+				});
+			}
+		});
 
-      google.accounts.id.prompt(); // 로그인 팝업 표시
-    }
-  </script>
+		google.accounts.id.prompt(); // 로그인 팝업 표시
+		}
+	</script>
+	<style>
+		html,
+		body {
+			background: #000;
+			width: 100%;
+			height: 100%;
+			overflow: visible;
+			padding: 0;
+			margin: 0;
+		}
 
+		div#gameContainer {
+			background: transparent !important;
+			position: absolute;
+		}
+
+		div#gameContainer canvas {
+			position: absolute;
+		}
+
+		div#gameContainer canvas[data-pixel-art="true"] {
+			position: absolute;
+			image-rendering: optimizeSpeed;
+			image-rendering: -webkit-crisp-edges;
+			image-rendering: -moz-crisp-edges;
+			image-rendering: -o-crisp-edges;
+			image-rendering: crisp-edges;
+			image-rendering: -webkit-optimize-contrast;
+			image-rendering: optimize-contrast;
+			image-rendering: pixelated;
+			-ms-interpolation-mode: nearest-neighbor;
+		}
+	</style>
 </head>
+
 <body>
-  <div id="unity-container" class="unity-desktop">
-    <canvas id="unity-canvas" style="width: 100%; height: 100%;" tabindex="-1"></canvas>
-    <div id="unity-loading-bar">
-      <div id="unity-logo"></div>
-      <div id="unity-progress-bar-empty">
-        <div id="unity-progress-bar-full"></div>
-      </div>
-    </div>
-    <div id="unity-warning"></div>
-    <div id="unity-footer">
-      <div id="unity-logo-title-footer"></div>
-      <div id="unity-fullscreen-button"></div>
-      <div id="unity-build-title">My project</div>
-    </div>
-  </div>
+	<div id="gameContainer">
+		<canvas id="unity-canvas" width="1920" height="1080" data-pixel-art=""></canvas>
+		<script src="Build/f2.loader.js"></script>
+		<script>
+			var canvas = document.querySelector("#unity-canvas");
+			var config = {
+				dataUrl: "Build/f2.data",
+				frameworkUrl: "Build/f2.framework.js",
+				codeUrl: "Build/f2.wasm",
+				streamingAssetsUrl: "StreamingAssets",
+				companyName: "DefaultCompany",
+				productName: "My project",
+				productVersion: "1.0",
+			};
+			var scaleToFit;
+			try {
+				scaleToFit = !!JSON.parse("");
+			} catch (e) {
+				scaleToFit = true;
+			}
+			function progressHandler(progress) {
+				var percent = progress * 100 + '%';
+				canvas.style.background = 'linear-gradient(to right, white, white ' + percent + ', transparent ' + percent + ', transparent) no-repeat center';
+				canvas.style.backgroundSize = '100% 1rem';
+			}
+			function onResize() {
+				var container = canvas.parentElement;
+				var w;
+				var h;
 
-  <script>
-    var canvas = document.querySelector("#unity-canvas");
+				if (scaleToFit) {
+					w = window.innerWidth;
+					h = window.innerHeight;
 
-    function unityShowBanner(msg, type) {
-      var warningBanner = document.querySelector("#unity-warning");
-      function updateBannerVisibility() {
-        warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
-      }
-      var div = document.createElement('div');
-      div.innerHTML = msg;
-      warningBanner.appendChild(div);
-      if (type == 'error') div.style = 'background: red; padding: 10px;';
-      else {
-        if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
-        setTimeout(function () {
-          warningBanner.removeChild(div);
-          updateBannerVisibility();
-        }, 5000);
-      }
-      updateBannerVisibility();
-    }
+					var r = 1080 / 1920;
 
-    var buildUrl = "Build";
-    var loaderUrl = buildUrl + "/f1.loader.js";
-    var config = {
-      arguments: [],
-      dataUrl: buildUrl + "/f1.data",
-      frameworkUrl: buildUrl + "/f1.framework.js",
-      codeUrl: buildUrl + "/f1.wasm",
-      streamingAssetsUrl: "StreamingAssets",
-      companyName: "DefaultCompany",
-      productName: "My project",
-      productVersion: "1.0",
-      showBanner: unityShowBanner,
-    };
+					if (w * r > window.innerHeight) {
+						w = Math.min(w, Math.ceil(h / r));
+					}
+					h = Math.floor(w * r);
+				} else {
+					w = 1920;
+					h = 1080;
+				}
 
-    if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-      var meta = document.createElement('meta');
-      meta.name = 'viewport';
-      meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
-      document.getElementsByTagName('head')[0].appendChild(meta);
-      document.querySelector("#unity-container").className = "unity-mobile";
-      canvas.className = "unity-mobile";
-    } else {
-      canvas.style.width = "1920px";
-      canvas.style.height = "1080px";
-    }
+				container.style.width = canvas.style.width = w + "px";
+				container.style.height = canvas.style.height = h + "px";
+				container.style.top = Math.floor((window.innerHeight - h) / 2) + "px";
+				container.style.left = Math.floor((window.innerWidth - w) / 2) + "px";
+			}
+			createUnityInstance(canvas, config, progressHandler).then(function (instance) {
+				canvas = instance.Module.canvas;
+				onResize();
+			});
+			window.addEventListener('resize', onResize);
+			onResize();
 
-    document.querySelector("#unity-loading-bar").style.display = "block";
+			if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+				// Mobile device style: fill the whole browser client area with the game canvas:
+				const meta = document.createElement('meta');
+				meta.name = 'viewport';
+				meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+				document.getElementsByTagName('head')[0].appendChild(meta);
+			}
 
-    var script = document.createElement("script");
-    script.src = loaderUrl;
-    script.onload = () => {
-      createUnityInstance(canvas, config, (progress) => {
-        document.querySelector("#unity-progress-bar-full").style.width = 100 * progress + "%";
-      }).then((unityInstance) => {
-        document.querySelector("#unity-loading-bar").style.display = "none";
-        document.querySelector("#unity-fullscreen-button").onclick = () => {
-          unityInstance.SetFullscreen(1);
-        };
-        window.unityInstance = unityInstance;
-      }).catch((message) => {
-        alert(message);
-      });
-    };
+			function unityShowBanner(msg, type) {
+			var warningBanner = document.querySelector("#unity-warning");
+			function updateBannerVisibility() {
+				warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+			}
+			var div = document.createElement('div');
+			div.innerHTML = msg;
+			warningBanner.appendChild(div);
+			if (type == 'error') div.style = 'background: red; padding: 10px;';
+			else {
+				if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
+				setTimeout(function () {
+				warningBanner.removeChild(div);
+				updateBannerVisibility();
+				}, 5000);
+			}
+				updateBannerVisibility();
+    		}
 
-    document.body.appendChild(script);
-  </script>
+			document.querySelector("#unity-loading-bar").style.display = "block";
+
+			var script = document.createElement("script");
+			script.src = loaderUrl;
+			script.onload = () => {
+			createUnityInstance(canvas, config, (progress) => {
+				document.querySelector("#unity-progress-bar-full").style.width = 100 * progress + "%";
+			}).then((unityInstance) => {
+				document.querySelector("#unity-loading-bar").style.display = "none";
+				document.querySelector("#unity-fullscreen-button").onclick = () => {
+				unityInstance.SetFullscreen(1);
+				};
+				window.unityInstance = unityInstance;
+			}).catch((message) => {
+				alert(message);
+			});
+			};
+		</script>
+	</div>
 </body>
+
 </html>
