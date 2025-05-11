@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <title>My project</title>
 
-  <!-- Firebase SDK -->
+  <!-- Firebase & Google Login -->
   <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-auth-compat.js"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -71,27 +71,30 @@
 
 <body>
   <div id="gameContainer">
-    <canvas id="unity-canvas"></canvas>
+    <canvas id="unity-canvas" data-pixel-art=""></canvas>
   </div>
 
-  <script src="Build/f2.loader.js"></script>
+  <script src="Build/f3.loader.js"></script>
   <script>
-    var canvas = document.querySelector("#unity-canvas");
-    var config = {
-      dataUrl: "Build/f2.data",
-      frameworkUrl: "Build/f2.framework.js",
-      codeUrl: "Build/f2.wasm",
+    const canvas = document.querySelector("#unity-canvas");
+    const config = {
+      dataUrl: "Build/f3.data",
+      frameworkUrl: "Build/f3.framework.js",
+      codeUrl: "Build/f3.wasm",
       streamingAssetsUrl: "StreamingAssets",
       companyName: "DefaultCompany",
       productName: "My project",
       productVersion: "1.0",
-      matchWebGLToCanvasSize: true // 핵심!
+      matchWebGLToCanvasSize: true
     };
 
-    createUnityInstance(canvas, config, (progress) => {
-      canvas.style.background = `linear-gradient(to right, white ${progress * 100}%, transparent ${progress * 100}%) no-repeat center`;
+    function progressHandler(progress) {
+      const percent = progress * 100 + '%';
+      canvas.style.background = `linear-gradient(to right, white ${percent}, transparent ${percent}) no-repeat center`;
       canvas.style.backgroundSize = '100% 1rem';
-    }).then((instance) => {
+    }
+
+    createUnityInstance(canvas, config, progressHandler).then((instance) => {
       window.unityInstance = instance;
     }).catch((message) => {
       alert(message);
