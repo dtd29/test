@@ -31,7 +31,8 @@
                 alert("로그인 실패: 이메일 정보를 가져오지 못했습니다.");
                 return;
               }
-
+              console.log(email);
+              console.log(email.endsWith("@dimigo.hs.kr"));
               // ❗ 정확하게 도메인 검사
               if (!email.toLowerCase().endsWith("@dimigo.hs.kr")) {
                 alert("로그인 실패: 디미고 계정이 아닙니다.");
