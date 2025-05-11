@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+  <meta charset="utf-8">
+  <title>My project</title>
+
+  <!-- Firebase & Google Login -->
+  <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-auth-compat.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCn7nhP5gDioksMqVbDtxCC3ZdJWLjxoIM",
+      authDomain: "test2-d9371.firebaseapp.com",
+      projectId: "test2-d9371",
+      storageBucket: "test2-d9371.appspot.com",
+      messagingSenderId: "826297010457",
+      appId: "1:826297010457:web:a65725b0ed69c64b94dd88"
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    function StartGoogleLoginJS() {
+      if (typeof google === 'undefined' || typeof firebase === 'undefined') return;
+      
+      google.accounts.id.initialize({
+        client_id: "920271608315-s4a4v4js2viqnf7lgofh826ljcvv8mqc.apps.googleusercontent.com",
+        callback: (response) => {
+          const credential = response.credential;
+          const provider = firebase.auth.GoogleAuthProvider.credential(credential);
+          firebase.auth().signInWithCredential(provider)
+            .then((result) => {
+              const user = result.user;
+
+              const email = user?.email;
+              const name = user?.displayName; 
+              const uid = user?.uid;
+
+              if (!email) {
+                alert("로그인 실패: 이메일 정보 없음");
+                return;
+              }
+
+              if (!email.endsWith("@dimigo.hs.kr")) {
+                alert("디미고 계정이 아님");
+                return;
+              }
+
+              if (typeof unityInstance !== 'undefined') {
+                unityInstance.SendMessage("FirebaseManager", "OnGoogleLogin", JSON.stringify({ email, name, uid }));
+              }
+            })
+            .catch((error) => {
+              alert("로그인 실패: " + error.message);
+              if (typeof unityInstance !== 'undefined') {
+                unityInstance.SendMessage("FirebaseManager", "OnLoginFailed", error.message);
+              }
+            });
+
+        }
+      });
+      google.accounts.id.prompt();
+    }
+  </script>
+
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #000;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+    #gameContainer {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+    }
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="gameContainer">
+    <canvas id="unity-canvas" data-pixel-art=""></canvas>
+  </div>
+
+  <script src="Build/f10.loader.js"></script>
+  <script>
+    const canvas = document.querySelector("#unity-canvas");
+    const config = {
+      dataUrl: "Build/f10.data",
+      frameworkUrl: "Build/f10.framework.js",
+      codeUrl: "Build/f10.wasm",
+      streamingAssetsUrl: "StreamingAssets",
+      companyName: "DefaultCompany",
+      productName: "My project",
+      productVersion: "1.0",
+      matchWebGLToCanvasSize: true
+    };
+
+    function progressHandler(progress) {
+      const percent = progress * 100 + '%';
+      canvas.style.background = `linear-gradient(to right, white ${percent}, transparent ${percent}) no-repeat center`;
+      canvas.style.backgroundSize = '100% 1rem';
+    }
+
+    createUnityInstance(canvas, config, progressHandler).then((instance) => {
+      window.unityInstance = instance;
+    }).catch((message) => {
+      alert(message);
+    });
+  </script>
+</body>
+</html>
