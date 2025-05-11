@@ -1,187 +1,101 @@
 <!DOCTYPE html>
 <html lang="en-us">
-
 <head>
-	<meta charset="utf-8">
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<title>My project</title>
+  <meta charset="utf-8">
+  <title>My project</title>
 
-	<script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-app-compat.js"></script>
-	<script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-auth-compat.js"></script>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-auth-compat.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 
-	<script>
-		const firebaseConfig = {
-		apiKey: "AIzaSyCn7nhP5gDioksMqVbDtxCC3ZdJWLjxoIM",
-		authDomain: "test2-d9371.firebaseapp.com",
-		projectId: "test2-d9371",
-		storageBucket: "test2-d9371.appspot.com",
-		messagingSenderId: "826297010457",
-		appId: "1:826297010457:web:a65725b0ed69c64b94dd88"
-		};
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCn7nhP5gDioksMqVbDtxCC3ZdJWLjxoIM",
+      authDomain: "test2-d9371.firebaseapp.com",
+      projectId: "test2-d9371",
+      storageBucket: "test2-d9371.appspot.com",
+      messagingSenderId: "826297010457",
+      appId: "1:826297010457:web:a65725b0ed69c64b94dd88"
+    };
+    firebase.initializeApp(firebaseConfig);
 
-		firebase.initializeApp(firebaseConfig);
-	</script>
+    function StartGoogleLoginJS() {
+      if (typeof google === 'undefined' || typeof firebase === 'undefined') return;
 
-	<script src="https://accounts.google.com/gsi/client" async defer></script>
+      google.accounts.id.initialize({
+        client_id: "920271608315-s4a4v4js2viqnf7lgofh826ljcvv8mqc.apps.googleusercontent.com",
+        callback: (response) => {
+          const credential = response.credential;
+          const provider = firebase.auth.GoogleAuthProvider.credential(credential);
+          firebase.auth().signInWithCredential(provider)
+            .then((result) => {
+              if (typeof unityInstance !== 'undefined') {
+                unityInstance.SendMessage("FirebaseManager", "OnGoogleLogin", result.user.email);
+              }
+            })
+            .catch((error) => {
+              if (typeof unityInstance !== 'undefined') {
+                unityInstance.SendMessage("FirebaseManager", "OnLoginFailed", error.message);
+              }
+            });
+        }
+      });
+      google.accounts.id.prompt();
+    }
+  </script>
 
-	<script>
-		function StartGoogleLoginJS() {
-		if (typeof google === 'undefined' || typeof firebase === 'undefined') {
-			console.error("필수 라이브러리가 로드되지 않았습니다.");
-			return;
-		}
-
-		if (typeof firebase.auth !== "function") {
-			console.error("❌ Firebase Auth 모듈이 준비되지 않았습니다.");
-			return;
-		}
-
-		google.accounts.id.initialize({
-			client_id: "920271608315-s4a4v4js2viqnf7lgofh826ljcvv8mqc.apps.googleusercontent.com",
-			callback: (response) => {
-			const credential = response.credential;
-			const provider = firebase.auth.GoogleAuthProvider.credential(credential);
-
-			firebase.auth().signInWithCredential(provider)
-				.then((result) => {
-				console.log("로그인 성공:", result.user.email);
-				if (typeof unityInstance !== 'undefined') {
-					unityInstance.SendMessage("FirebaseManager", "OnGoogleLogin", result.user.email);
-				}
-				})
-				.catch((error) => {
-				console.error("로그인 실패:", error.message);
-				if (typeof unityInstance !== 'undefined') {
-					unityInstance.SendMessage("FirebaseManager", "OnLoginFailed", error.message);
-				}
-				});
-			}
-		});
-
-		google.accounts.id.prompt(); // 로그인 팝업 표시
-		}
-	</script>
-	<style>
-		html,
-		body {
-			background: #000;
-			width: 100%;
-			height: 100%;
-			overflow: visible;
-			padding: 0;
-			margin: 0;
-		}
-
-		div#gameContainer {
-			background: transparent !important;
-			position: absolute;
-		}
-
-		div#gameContainer canvas {
-			position: absolute;
-		}
-
-		div#gameContainer canvas[data-pixel-art="true"] {
-			position: absolute;
-			image-rendering: optimizeSpeed;
-			image-rendering: -webkit-crisp-edges;
-			image-rendering: -moz-crisp-edges;
-			image-rendering: -o-crisp-edges;
-			image-rendering: crisp-edges;
-			image-rendering: -webkit-optimize-contrast;
-			image-rendering: optimize-contrast;
-			image-rendering: pixelated;
-			-ms-interpolation-mode: nearest-neighbor;
-		}
-	</style>
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #000;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+    #gameContainer {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+    }
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+  </style>
 </head>
 
 <body>
-	<div id="gameContainer">
-		<canvas id="unity-canvas" width="1920" height="1080" data-pixel-art=""></canvas>
-		<script src="Build/f2.loader.js"></script>
-		<script>
-			var canvas = document.querySelector("#unity-canvas");
-			var config = {
-				dataUrl: "Build/f2.data",
-				frameworkUrl: "Build/f2.framework.js",
-				codeUrl: "Build/f2.wasm",
-				streamingAssetsUrl: "StreamingAssets",
-				companyName: "DefaultCompany",
-				productName: "My project",
-				productVersion: "1.0",
-			};
-			var scaleToFit;
-			try {
-				scaleToFit = !!JSON.parse("");
-			} catch (e) {
-				scaleToFit = true;
-			}
-			function progressHandler(progress) {
-				var percent = progress * 100 + '%';
-				canvas.style.background = 'linear-gradient(to right, white, white ' + percent + ', transparent ' + percent + ', transparent) no-repeat center';
-				canvas.style.backgroundSize = '100% 1rem';
-			}
-			function onResize() {
-				var container = canvas.parentElement;
-				var w;
-				var h;
+  <div id="gameContainer">
+    <canvas id="unity-canvas"></canvas>
+  </div>
 
-				if (scaleToFit) {
-					w = window.innerWidth;
-					h = window.innerHeight;
+  <script src="Build/f2.loader.js"></script>
+  <script>
+    var canvas = document.querySelector("#unity-canvas");
+    var config = {
+      dataUrl: "Build/f2.data",
+      frameworkUrl: "Build/f2.framework.js",
+      codeUrl: "Build/f2.wasm",
+      streamingAssetsUrl: "StreamingAssets",
+      companyName: "DefaultCompany",
+      productName: "My project",
+      productVersion: "1.0",
+      matchWebGLToCanvasSize: true // 핵심!
+    };
 
-					var r = 1080 / 1920;
-
-					if (w * r > window.innerHeight) {
-						w = Math.min(w, Math.ceil(h / r));
-					}
-					h = Math.floor(w * r);
-				} else {
-					w = 1920;
-					h = 1080;
-				}
-
-				container.style.width = canvas.style.width = w + "px";
-				container.style.height = canvas.style.height = h + "px";
-				container.style.top = Math.floor((window.innerHeight - h) / 2) + "px";
-				container.style.left = Math.floor((window.innerWidth - w) / 2) + "px";
-			}
-			createUnityInstance(canvas, config, progressHandler).then(function (instance) {
-				canvas = instance.Module.canvas;
-				onResize();
-			});
-			window.addEventListener('resize', onResize);
-			onResize();
-
-			if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-				// Mobile device style: fill the whole browser client area with the game canvas:
-				const meta = document.createElement('meta');
-				meta.name = 'viewport';
-				meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
-				document.getElementsByTagName('head')[0].appendChild(meta);
-			}
-
-			function unityShowBanner(msg, type) {
-			var warningBanner = document.querySelector("#unity-warning");
-			function updateBannerVisibility() {
-				warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
-			}
-			var div = document.createElement('div');
-			div.innerHTML = msg;
-			warningBanner.appendChild(div);
-			if (type == 'error') div.style = 'background: red; padding: 10px;';
-			else {
-				if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
-				setTimeout(function () {
-				warningBanner.removeChild(div);
-				updateBannerVisibility();
-				}, 5000);
-			}
-				updateBannerVisibility();
-    		}
-		</script>
-	</div>
+    createUnityInstance(canvas, config, (progress) => {
+      canvas.style.background = `linear-gradient(to right, white ${progress * 100}%, transparent ${progress * 100}%) no-repeat center`;
+      canvas.style.backgroundSize = '100% 1rem';
+    }).then((instance) => {
+      window.unityInstance = instance;
+    }).catch((message) => {
+      alert(message);
+    });
+  </script>
 </body>
-
 </html>
