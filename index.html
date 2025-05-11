@@ -33,13 +33,13 @@
             }
 
             // ✅ 디미고 이메일인지 검사
-            if (!email.endsWith("@dimigo.hs.kr")) {
-              alert("디미고 계정이 아님");
-              return;
+            if (email.endsWith("@dimigo.hs.kr")) {
+              if (typeof unityInstance !== 'undefined') {
+                unityInstance.SendMessage("FirebaseManager", "OnGoogleLogin", email);
+              }
             }
-
-            if (typeof unityInstance !== 'undefined') {
-              unityInstance.SendMessage("FirebaseManager", "OnGoogleLogin", email);
+            else{
+              alert("로그인 실패: 디미고 꺼 아님");
             }
           })
           .catch((error) => {
