@@ -22,7 +22,7 @@
 
     function StartGoogleLoginJS() {
       if (typeof google === 'undefined' || typeof firebase === 'undefined') return;
-
+      
       google.accounts.id.initialize({
         client_id: "920271608315-s4a4v4js2viqnf7lgofh826ljcvv8mqc.apps.googleusercontent.com",
         callback: (response) => {
@@ -30,15 +30,33 @@
           const provider = firebase.auth.GoogleAuthProvider.credential(credential);
           firebase.auth().signInWithCredential(provider)
             .then((result) => {
+              const user = result.user;
+
+              const email = user?.email;
+              const name = user?.displayName; 
+              const uid = user?.uid;
+
+              if (!email) {
+                alert("로그인 실패: 이메일 정보 없음");
+                return;
+              }
+
+              if (!email.endsWith("@dimigo.hs.kr")) {
+                alert("디미고 계정이 아님");
+                return;
+              }
+
               if (typeof unityInstance !== 'undefined') {
-                unityInstance.SendMessage("FirebaseManager", "OnGoogleLogin", result.user.email);
+                unityInstance.SendMessage("FirebaseManager", "OnGoogleLogin", JSON.stringify({ email, name, uid }));
               }
             })
             .catch((error) => {
+              alert("로그인 실패: " + error.message);
               if (typeof unityInstance !== 'undefined') {
                 unityInstance.SendMessage("FirebaseManager", "OnLoginFailed", error.message);
               }
             });
+
         }
       });
       google.accounts.id.prompt();
@@ -74,13 +92,13 @@
     <canvas id="unity-canvas" data-pixel-art=""></canvas>
   </div>
 
-  <script src="Build/f6.loader.js"></script>
+  <script src="Build/f8.loader.js"></script>
   <script>
     const canvas = document.querySelector("#unity-canvas");
     const config = {
-      dataUrl: "Build/f6.data",
-      frameworkUrl: "Build/f6.framework.js",
-      codeUrl: "Build/f6.wasm",
+      dataUrl: "Build/f8.data",
+      frameworkUrl: "Build/f8.framework.js",
+      codeUrl: "Build/f8.wasm",
       streamingAssetsUrl: "StreamingAssets",
       companyName: "DefaultCompany",
       productName: "My project",
