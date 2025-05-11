@@ -7,18 +7,16 @@
   <link rel="shortcut icon" href="TemplateData/favicon.ico">
   <link rel="stylesheet" href="TemplateData/style.css">
 
-  <!-- ✅ Firebase SDK: 브라우저용 compat 버전 사용 (절대 이거만 써야 함) -->
   <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-auth-compat.js"></script>
 
-  <!-- ✅ Firebase 초기화 -->
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyCn7nhP5gDioksMqVbDtxCC3ZdJWLjxoIM",
       authDomain: "test2-d9371.firebaseapp.com",
       projectId: "test2-d9371",
-      storageBucket: "test2-d9371.appspot.com", // 여기도 오타 고침
+      storageBucket: "test2-d9371.appspot.com",
       messagingSenderId: "826297010457",
       appId: "1:826297010457:web:a65725b0ed69c64b94dd88"
     };
@@ -26,12 +24,9 @@
     firebase.initializeApp(firebaseConfig);
   </script>
 
-
-  <!-- Google Identity Services -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <script>
-    // ✅ Unity → jslib → 여기 도달함
     function StartGoogleLoginJS() {
       if (typeof google === 'undefined' || typeof firebase === 'undefined') {
         console.error("필수 라이브러리가 로드되지 않았습니다.");
@@ -72,7 +67,7 @@
 </head>
 <body>
   <div id="unity-container" class="unity-desktop">
-    <canvas id="unity-canvas" width=1920 height=1080 tabindex="-1"></canvas>
+    <canvas id="unity-canvas" style="width: 100%; height: 100%;" tabindex="-1"></canvas>
     <div id="unity-loading-bar">
       <div id="unity-logo"></div>
       <div id="unity-progress-bar-empty">
