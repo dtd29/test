@@ -30,11 +30,11 @@
           const provider = firebase.auth.GoogleAuthProvider.credential(credential);
           firebase.auth().signInWithCredential(provider)
             .then((result) => {
-              if (!email.endsWith("@dimigo.hs.kr")) {
+              if (!email.endsWith("dimigo.hs.kr")) {
                 alert("디미고 계정이 아님");
                 return;
               }
-              
+
               if (typeof unityInstance !== 'undefined') {
                 unityInstance.SendMessage("FirebaseManager", "OnGoogleLogin", result.user.email);
               }
