@@ -46,8 +46,9 @@
               }
 
               if (typeof unityInstance !== 'undefined') {
-                unityInstance.SendMessage("FirebaseManager", "OnGoogleLogin", JSON.stringify({ email, name}));
-                return;
+                //unityInstance.SendMessage("FirebaseManager", "OnGoogleLogin", JSON.stringify({email, name}));
+                unityInstance.SendMessage("FirebaseManager", "OnGoogleLogin", email);
+
               }
             })
             .catch((error) => {
