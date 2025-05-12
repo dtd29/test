@@ -46,13 +46,11 @@
               }
 
               if (typeof unityInstance !== 'undefined') {
-                //unityInstance.SendMessage("FirebaseManager", "OnGoogleLogin", JSON.stringify({email, name}));
-                unityInstance.SendMessage("FirebaseManager", "OnGoogleLogin", email);
-
+                unityInstance.SendMessage("FirebaseManager", "OnGoogleLogin", JSON.stringify({ email, name}));
               }
             })
             .catch((error) => {
-              alert("로그인 실패: " + error.message);
+              //alert("로그인 실패: " + error.message);
               if (typeof unityInstance !== 'undefined') {
                 unityInstance.SendMessage("FirebaseManager", "OnLoginFailed", error.message);
               }
@@ -93,13 +91,13 @@
     <canvas id="unity-canvas" data-pixel-art=""></canvas>
   </div>
 
-  <script src="Build/f11.loader.js"></script>
+  <script src="Build/f12.loader.js"></script>
   <script>
     const canvas = document.querySelector("#unity-canvas");
     const config = {
-      dataUrl: "Build/f11.data",
-      frameworkUrl: "Build/f11.framework.js",
-      codeUrl: "Build/f11.wasm",
+      dataUrl: "Build/f12.data",
+      frameworkUrl: "Build/f12.framework.js",
+      codeUrl: "Build/f12.wasm",
       streamingAssetsUrl: "StreamingAssets",
       companyName: "DefaultCompany",
       productName: "My project",
