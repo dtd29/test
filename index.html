@@ -89,7 +89,8 @@
             if (typeof unityInstance !== 'undefined') {
               unityInstance.SendMessage("FirebaseManager", "OnScoreLoaded", JSON.stringify(data));
             }
-          } else {
+          } 
+          else {
             console.warn("점수 없음 (신규 유저)");
             if (typeof unityInstance !== 'undefined') {
               unityInstance.SendMessage("FirebaseManager", "OnScoreLoaded", JSON.stringify({ score: 0 }));
@@ -135,13 +136,13 @@
     <canvas id="unity-canvas" data-pixel-art=""></canvas>
   </div>
 
-  <script src="Build/s5.loader.js"></script>
+  <script src="Build/s6.loader.js"></script>
   <script>
     const canvas = document.querySelector("#unity-canvas");
     const config = {
-      dataUrl: "Build/s5.data",
-      frameworkUrl: "Build/s5.framework.js",
-      codeUrl: "Build/s5.wasm",
+      dataUrl: "Build/s6.data",
+      frameworkUrl: "Build/s6.framework.js",
+      codeUrl: "Build/s6.wasm",
       streamingAssetsUrl: "StreamingAssets",
       companyName: "DefaultCompany",
       productName: "My project",
