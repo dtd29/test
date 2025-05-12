@@ -48,7 +48,7 @@
               // }
 
               if (typeof unityInstance !== 'undefined') {
-                unityInstance.SendMessage("FirebaseManager", "OnGoogleLogin", JSON.stringify({email, name,uid}));
+                unityInstance.SendMessage("FirebaseManager", "OnGoogleLogin", JSON.stringify({email, name, uid}));
               }
             })
             .catch((error) => {
@@ -87,13 +87,13 @@
 
             // Unity로 전달 (JSON 문자열로)
             if (typeof unityInstance !== 'undefined') {
-              unityInstance.SendMessage("FirebaseManager", "OnScoreLoaded", JSON.stringify(data));
+              unityInstance.SendMessage("FirebaseManager", "OnScoreLoaded", data.score);
             }
           } 
           else {
             console.warn("점수 없음 (신규 유저)");
             if (typeof unityInstance !== 'undefined') {
-              unityInstance.SendMessage("FirebaseManager", "OnScoreLoaded", JSON.stringify({ score: 0 }));
+              unityInstance.SendMessage("FirebaseManager", "OnScoreLoaded", 0);
             }
           }
         })
@@ -136,13 +136,13 @@
     <canvas id="unity-canvas" data-pixel-art=""></canvas>
   </div>
 
-  <script src="Build/s9.loader.js"></script>
+  <script src="Build/s10.loader.js"></script>
   <script>
     const canvas = document.querySelector("#unity-canvas");
     const config = {
-      dataUrl: "Build/s9.data",
-      frameworkUrl: "Build/s9.framework.js",
-      codeUrl: "Build/s9.wasm",
+      dataUrl: "Build/s10.data",
+      frameworkUrl: "Build/s10.framework.js",
+      codeUrl: "Build/s10.wasm",
       streamingAssetsUrl: "StreamingAssets",
       companyName: "DefaultCompany",
       productName: "My project",
