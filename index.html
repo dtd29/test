@@ -7,6 +7,7 @@
   <!-- Firebase & Google Login -->
   <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-firestore-compat.js"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <script>
@@ -34,7 +35,8 @@
 
               const email = user?.email;
               const name = user?.displayName; 
-
+              const uid = user?.uid; 
+              
               if (!email) {
                 alert("로그인 실패: 이메일 정보 없음");
                 return;
@@ -46,7 +48,7 @@
               }
 
               if (typeof unityInstance !== 'undefined') {
-                unityInstance.SendMessage("FirebaseManager", "OnGoogleLogin", JSON.stringify({ email, name}));
+                unityInstance.SendMessage("FirebaseManager", "OnGoogleLogin", JSON.stringify({email, name,uid}));
               }
             })
             .catch((error) => {
@@ -59,6 +61,19 @@
         }
       });
       google.accounts.id.prompt();
+    }
+
+    function SaveScoreToFirestoreJS(uid, name, score) {
+      const db = firebase.firestore();
+      db.collection("scores").doc(uid).set({
+        name: name,
+        score: score,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(() => {
+        console.log("✅ 점수 저장 완료");
+      }).catch((error) => {
+        console.error("❌ 점수 저장 실패:", error);
+      });
     }
   </script>
 
@@ -91,13 +106,13 @@
     <canvas id="unity-canvas" data-pixel-art=""></canvas>
   </div>
 
-  <script src="Build/f13.loader.js"></script>
+  <script src="Build/s1.loader.js"></script>
   <script>
     const canvas = document.querySelector("#unity-canvas");
     const config = {
-      dataUrl: "Build/f13.data",
-      frameworkUrl: "Build/f13.framework.js",
-      codeUrl: "Build/f13.wasm",
+      dataUrl: "Build/s1.data",
+      frameworkUrl: "Build/s1.framework.js",
+      codeUrl: "Build/s1.wasm",
       streamingAssetsUrl: "StreamingAssets",
       companyName: "DefaultCompany",
       productName: "My project",
