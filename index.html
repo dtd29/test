@@ -42,10 +42,10 @@
                 return;
               }
 
-              if (!email.endsWith("@dimigo.hs.kr")) {
-                alert("디미고 계정이 아님");
-                return;
-              }
+              // if (!email.endsWith("@dimigo.hs.kr")) {
+              //   alert("디미고 계정이 아님");
+              //   return;
+              // }
 
               if (typeof unityInstance !== 'undefined') {
                 unityInstance.SendMessage("FirebaseManager", "OnGoogleLogin", JSON.stringify({email, name,uid}));
