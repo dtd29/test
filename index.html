@@ -20,7 +20,7 @@
       appId: "1:826297010457:web:a65725b0ed69c64b94dd88"
     };
     firebase.initializeApp(firebaseConfig);
-
+    
     function StartGoogleLoginJS() {
       if (typeof google === 'undefined' || typeof firebase === 'undefined') return;
       
@@ -83,21 +83,21 @@
         .then((doc) => {
           if (doc.exists) {
             const data = doc.data();
-            console.log("📥 점수 불러오기 성공:", data);
+            console.log("점수 불러오기 성공:", data);
 
             // Unity로 전달 (JSON 문자열로)
             if (typeof unityInstance !== 'undefined') {
               unityInstance.SendMessage("FirebaseManager", "OnScoreLoaded", JSON.stringify(data));
             }
           } else {
-            console.warn("❗ 점수 없음 (신규 유저)");
+            console.warn("점수 없음 (신규 유저)");
             if (typeof unityInstance !== 'undefined') {
               unityInstance.SendMessage("FirebaseManager", "OnScoreLoaded", JSON.stringify({ score: 0 }));
             }
           }
         })
         .catch((error) => {
-          console.error("❌ 점수 불러오기 실패:", error);
+          console.error("점수 불러오기 실패:", error);
           if (typeof unityInstance !== 'undefined') {
             unityInstance.SendMessage("FirebaseManager", "OnScoreLoadFailed", error.message);
           }
@@ -135,13 +135,13 @@
     <canvas id="unity-canvas" data-pixel-art=""></canvas>
   </div>
 
-  <script src="Build/s3.loader.js"></script>
+  <script src="Build/s4.loader.js"></script>
   <script>
     const canvas = document.querySelector("#unity-canvas");
     const config = {
-      dataUrl: "Build/s3.data",
-      frameworkUrl: "Build/s3.framework.js",
-      codeUrl: "Build/s3.wasm",
+      dataUrl: "Build/s4.data",
+      frameworkUrl: "Build/s4.framework.js",
+      codeUrl: "Build/s4.wasm",
       streamingAssetsUrl: "StreamingAssets",
       companyName: "DefaultCompany",
       productName: "My project",
