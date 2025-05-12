@@ -75,6 +75,35 @@
         console.error("❌ 점수 저장 실패:", error);
       });
     }
+
+    function LoadScoreFromFirestoreJS(uid) {
+      const db = firebase.firestore();
+
+      db.collection("scores").doc(uid).get()
+        .then((doc) => {
+          if (doc.exists) {
+            const data = doc.data();
+            console.log("📥 점수 불러오기 성공:", data);
+
+            // Unity로 전달 (JSON 문자열로)
+            if (typeof unityInstance !== 'undefined') {
+              unityInstance.SendMessage("FirebaseManager", "OnScoreLoaded", JSON.stringify(data));
+            }
+          } else {
+            console.warn("❗ 점수 없음 (신규 유저)");
+            if (typeof unityInstance !== 'undefined') {
+              unityInstance.SendMessage("FirebaseManager", "OnScoreLoaded", JSON.stringify({ score: 0 }));
+            }
+          }
+        })
+        .catch((error) => {
+          console.error("❌ 점수 불러오기 실패:", error);
+          if (typeof unityInstance !== 'undefined') {
+            unityInstance.SendMessage("FirebaseManager", "OnScoreLoadFailed", error.message);
+          }
+        });
+    }
+
   </script>
 
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no">
@@ -106,13 +135,13 @@
     <canvas id="unity-canvas" data-pixel-art=""></canvas>
   </div>
 
-  <script src="Build/s1.loader.js"></script>
+  <script src="Build/s2.loader.js"></script>
   <script>
     const canvas = document.querySelector("#unity-canvas");
     const config = {
-      dataUrl: "Build/s1.data",
-      frameworkUrl: "Build/s1.framework.js",
-      codeUrl: "Build/s1.wasm",
+      dataUrl: "Build/s2.data",
+      frameworkUrl: "Build/s2.framework.js",
+      codeUrl: "Build/s2.wasm",
       streamingAssetsUrl: "StreamingAssets",
       companyName: "DefaultCompany",
       productName: "My project",
