@@ -70,9 +70,9 @@
         score: score,
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
       }).then(() => {
-        console.log("✅ 점수 저장 완료");
+        console.log("점수 저장 완료");
       }).catch((error) => {
-        console.error("❌ 점수 저장 실패:", error);
+        console.error("점수 저장 실패:", error);
       });
     }
 
@@ -136,13 +136,13 @@
     <canvas id="unity-canvas" data-pixel-art=""></canvas>
   </div>
 
-  <script src="Build/s6.loader.js"></script>
+  <script src="Build/s7.loader.js"></script>
   <script>
     const canvas = document.querySelector("#unity-canvas");
     const config = {
-      dataUrl: "Build/s6.data",
-      frameworkUrl: "Build/s6.framework.js",
-      codeUrl: "Build/s6.wasm",
+      dataUrl: "Build/s7.data",
+      frameworkUrl: "Build/s7.framework.js",
+      codeUrl: "Build/s7.wasm",
       streamingAssetsUrl: "StreamingAssets",
       companyName: "DefaultCompany",
       productName: "My project",
